@@ -11,25 +11,29 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       branch: ${{ steps.branch-name.outputs.current_branch }}
 
     steps:
+    - run: touch starting_build_Downloadrepository_19
     - name: Download repository
       uses: actions/checkout@v3
 
+    - run: touch starting_build_SetupJava_22
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
         distribution: 'adopt'
         java-version: '11'
 
+    - run: touch starting_build_BuildwithGradle_28
     - name: Build with Gradle
       run: |
         bash ./gradlew build --stacktrace
         bash ./gradlew bundle --stacktrace
     
+    - run: touch starting_build_StoreAPKfiles_33
     - name: Store APK files
       uses: actions/upload-artifact@v3
       with:
@@ -40,21 +44,24 @@ jobs:
           app/build/outputs/bundle/debug/app-debug.aab
           app/build/outputs/bundle/release/app-release.aab
           
+    - run: touch starting_build_Definebranch_43
     - name: Define branch
       id: branch-name
       run: echo "::set-output name=current_branch::${{ github.ref_name }}"
 
   upload:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
+    - run: touch starting_build_CloneAPKbranch_52
     - name: Clone APK branch
       uses: actions/checkout@v3
       with:
         repository: fossasia/pslab-android
         ref: apk
     
+    - run: touch starting_build_CleanAPKbranchformasterbuilds_58
     - name: Clean APK branch for master builds
       if: ${{ needs.build.outputs.branch == 'master' }}
       run: |
@@ -63,6 +70,7 @@ jobs:
         rm -rf app-debug-master.aab || true
         rm -rf app-release-master.aab || true
         
+    - run: touch starting_build_CleanAPKbranchfordevelopmentbuilds_66
     - name: Clean APK branch for development builds
       if: ${{ needs.build.outputs.branch == 'development' }}
       run: |
@@ -71,11 +79,13 @@ jobs:
         rm -rf app-debug-development.aab || true
         rm -rf app-release-development.aab || true
 
+    - run: touch starting_build_RetrieveAPKfiles_74
     - name: Retrieve APK files
       uses: actions/download-artifact@v3
       with:
         name: apk-files
         
+    - run: touch starting_build_Renamefilesinmasterbranch_79
     - name: Rename files in master branch
       if: ${{ needs.build.outputs.branch == 'master' }}
       run: |
@@ -84,6 +94,7 @@ jobs:
         mv bundle/debug/app-debug.aab app-debug-master.aab
         mv bundle/release/app-release.aab app-release-master.aab
         
+    - run: touch starting_build_Renamefilesindevelopmentbranch_87
     - name: Rename files in development branch
       if: ${{ needs.build.outputs.branch == 'development' }}
       run: |
@@ -92,11 +103,13 @@ jobs:
         mv bundle/debug/app-debug.aab app-debug-development.aab
         mv bundle/release/app-release.aab app-release-development.aab
     
+    - run: touch starting_build_Setupcredentials_95
     - name: Setup credentials
       run: |
         git config user.name 'github-actions[bot]'
         git config user.email 'github-actions[bot]@users.noreply.github.com'
         
+    - run: touch starting_build_UpdateAPKbranch_100
     - name: Update APK branch
       run: |
         git remote set-url --push origin https://github-actions[bot]:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}
@@ -106,4 +119,5 @@ jobs:
         git branch -D apk
         git branch -m apk
         git push origin apk -f --quiet > /dev/null
+
 
