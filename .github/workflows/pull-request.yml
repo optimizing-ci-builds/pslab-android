@@ -8,25 +8,30 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
+    - run: touch starting_build_Downloadrepository_14
     - name: Download repository
       uses: actions/checkout@v3
 
+    - run: touch starting_build_SetupJava_17
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
         distribution: 'adopt'
         java-version: '11'
 
+    - run: touch starting_build_BuildwithGradle_23
     - name: Build with Gradle
       run: |
         bash ./gradlew build --stacktrace
 
+    - run: touch starting_build_StoreAPKfile_27
     - name: Store APK file
       uses: actions/upload-artifact@v3
       with:
         name: apk-files
         path: |
           app/build/outputs/apk/debug/app-debug.apk
+
